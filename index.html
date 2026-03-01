@@ -242,6 +242,12 @@
         }
       });
 
+      const input = document.getElementById("textInput");
+      input.addEventListener("blur", () => setTimeout(() => input.focus(), 10));
+      input.focus();
+
+      document.addEventListener("click", () => input.focus());
+
       document.addEventListener("paste", (e) => {
         const cd = e.clipboardData || window.clipboardData;
         if (!cd) {
