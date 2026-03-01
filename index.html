@@ -1,127 +1,256 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Clipboard History</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; background: #f5f5f5; }
-    h1 { margin-bottom: 20px; color: #333; }
-    .input-area { margin-bottom: 20px; }
-    #textInput { width: 100%; padding: 12px; font-size: 16px; border: 2px solid #ddd; border-radius: 8px; outline: none; }
-    #textInput:focus { border-color: #007bff; }
-    .hint { font-size: 14px; color: #666; margin-top: 8px; }
-    .history { display: flex; flex-direction: column; gap: 12px; }
-    .item { background: white; border-radius: 8px; padding: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; position: relative; }
-    .item:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
-    .item.text-item { white-space: pre-wrap; word-break: break-word; }
-    .item.image-item img { max-width: 100%; max-height: 200px; border-radius: 4px; }
-    .item .label { position: absolute; top: 8px; right: 8px; font-size: 12px; color: #999; }
-    .item .delete { position: absolute; top: 8px; right: 40px; font-size: 12px; color: #dc3545; cursor: pointer; }
-    .empty { text-align: center; color: #999; padding: 40px; }
-    .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 8px; opacity: 0; transition: opacity 0.3s; }
-    .toast.show { opacity: 1; }
-  </style>
-</head>
-<body>
-  <h1>Clipboard History</h1>
-  <div class="input-area">
-    <input type="text" id="textInput" placeholder="Type to add item (max 10)">
-    <p class="hint">Click item to copy • Paste (Ctrl+V) anywhere to capture</p>
-  </div>
-  <div class="history" id="history"></div>
-  <div class="toast" id="toast"></div>
-
-  <script>
-    const MAX_ITEMS = 10;
-    const STORAGE_KEY = 'clipboardHistory';
-    let history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-
-    function save() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
-    }
-
-    function showToast(msg) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 1500);
-    }
-
-    function addItem(content, type) {
-      if (history.length >= MAX_ITEMS) history.pop();
-      history.unshift({ content, type, id: Date.now() });
-      save();
-      render();
-    }
-
-    function deleteItem(id) {
-      history = history.filter(i => i.id !== id);
-      save();
-      render();
-    }
-
-    function copyItem(item) {
-      if (item.type === 'text') {
-        navigator.clipboard.writeText(item.content);
-        showToast('Copied to clipboard!');
-      } else if (item.type === 'image') {
-        fetch(item.content)
-          .then(r => r.blob())
-          .then(blob => navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]))
-          .then(() => showToast('Image copied!'))
-          .catch(() => showToast('Failed to copy image'));
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clipboard History</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
       }
-    }
-
-    function render() {
-      const el = document.getElementById('history');
-      if (history.length === 0) {
-        el.innerHTML = '<div class="empty">No items yet. Paste or type to add!</div>';
-        return;
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 20px;
+        background: #f5f5f5;
       }
-      el.innerHTML = history.map(item => {
-        if (item.type === 'text') {
-          return `<div class="item text-item" onclick="copyItem(history.find(i => i.id === ${item.id}))">${escapeHtml(item.content)}<span class="label">text</span><span class="delete" onclick="event.stopPropagation(); deleteItem(${item.id})">✕</span></div>`;
-        } else {
-          return `<div class="item image-item" onclick="copyItem(history.find(i => i.id === ${item.id}))"><img src="${item.content}" alt="clipboard image"><span class="label">image</span><span class="delete" onclick="event.stopPropagation(); deleteItem(${item.id})">✕</span></div>`;
+      h1 {
+        margin-bottom: 20px;
+        color: #333;
+      }
+      .input-area {
+        margin-bottom: 20px;
+      }
+      #textInput {
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        outline: none;
+      }
+      #textInput:focus {
+        border-color: #007bff;
+      }
+      .hint {
+        font-size: 14px;
+        color: #666;
+        margin-top: 8px;
+      }
+      .history {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .item {
+        background: white;
+        border-radius: 8px;
+        padding: 16px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+        position: relative;
+      }
+      .item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      }
+      .item.text-item {
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .item.image-item img {
+        max-width: 100%;
+        max-height: 200px;
+        border-radius: 4px;
+      }
+      .item .label {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        font-size: 12px;
+        color: #999;
+      }
+      .item .delete {
+        position: absolute;
+        top: 8px;
+        right: 40px;
+        font-size: 12px;
+        color: #dc3545;
+        cursor: pointer;
+      }
+      .empty {
+        text-align: center;
+        color: #999;
+        padding: 40px;
+      }
+      .toast {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #333;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      .toast.show {
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Clipboard History</h1>
+    <div class="input-area">
+      <input
+        type="text"
+        id="textInput"
+        placeholder="Type to add item (max 10)"
+      />
+      <p class="hint">Click item to copy • Paste (Ctrl+V / Cmd+V) to capture</p>
+    </div>
+    <div class="history" id="history"></div>
+    <div class="toast" id="toast"></div>
+
+    <script>
+      const MAX_ITEMS = 10;
+      const STORAGE_KEY = "clipboardHistory";
+      let history = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+
+      function save() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+      }
+
+      function showToast(msg) {
+        const t = document.getElementById("toast");
+        t.textContent = msg;
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 1500);
+      }
+
+      function addItem(content, type) {
+        if (history.length >= MAX_ITEMS) history.pop();
+        history.unshift({ content, type, id: Date.now() });
+        save();
+        render();
+      }
+
+      function deleteItem(id) {
+        history = history.filter((i) => i.id !== id);
+        save();
+        render();
+      }
+
+      function copyItem(item) {
+        if (item.type === "text") {
+          navigator.clipboard
+            .writeText(item.content)
+            .then(() => {
+              showToast("Copied to clipboard!");
+            })
+            .catch(() => {
+              const ta = document.createElement("textarea");
+              ta.value = item.content;
+              document.body.appendChild(ta);
+              ta.select();
+              document.execCommand("copy");
+              document.body.removeChild(ta);
+              showToast("Copied to clipboard!");
+            });
+        } else if (item.type === "image") {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0);
+            canvas.toBlob((blob) => {
+              if (navigator.clipboard && navigator.clipboard.write) {
+                navigator.clipboard
+                  .write([new ClipboardItem({ "image/png": blob })])
+                  .then(() => showToast("Image copied!"))
+                  .catch(() =>
+                    showToast("Image copy not supported in this browser")
+                  );
+              } else {
+                showToast("Image copy not supported in this browser");
+              }
+            }, "image/png");
+          };
+          img.src = item.content;
         }
-      }).join('');
-    }
-
-    function escapeHtml(str) {
-      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    }
-
-    document.getElementById('textInput').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && e.target.value.trim()) {
-        addItem(e.target.value.trim(), 'text');
-        e.target.value = '';
       }
-    });
 
-    document.addEventListener('paste', async (e) => {
-      const items = e.clipboardData?.items;
-      if (!items) return;
+      function render() {
+        const el = document.getElementById("history");
+        if (history.length === 0) {
+          el.innerHTML =
+            '<div class="empty">No items yet. Paste or type to add!</div>';
+          return;
+        }
+        el.innerHTML = history
+          .map((item) => {
+            if (item.type === "text") {
+              return `<div class="item text-item" onclick="copyItem(history.find(i => i.id === ${item.id}))">${escapeHtml(item.content)}<span class="label">text</span><span class="delete" onclick="event.stopPropagation(); deleteItem(${item.id})">✕</span></div>`;
+            } else {
+              return `<div class="item image-item" onclick="copyItem(history.find(i => i.id === ${item.id}))"><img src="${item.content}" alt="clipboard image"><span class="label">image</span><span class="delete" onclick="event.stopPropagation(); deleteItem(${item.id})">✕</span></div>`;
+            }
+          })
+          .join("");
+      }
 
-      for (const item of items) {
-        if (item.type.startsWith('text/')) {
-          const text = await item.getAsText();
-          if (text) { addItem(text, 'text'); return; }
-        } else if (item.type.startsWith('image/')) {
-          const file = item.getAsFile();
-          if (file) {
-            const reader = new FileReader();
-            reader.onload = () => { addItem(reader.result, 'image'); };
-            reader.readAsDataURL(file);
+      function escapeHtml(str) {
+        return str
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+
+      document.getElementById("textInput").addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && e.target.value.trim()) {
+          addItem(e.target.value.trim(), "text");
+          e.target.value = "";
+        }
+      });
+
+      document.addEventListener("paste", (e) => {
+        const cd = e.clipboardData || window.clipboardData;
+        if (!cd) return;
+
+        const types = cd.types || [];
+        const hasText = Array.from(types).some(
+          (t) => t === "text/plain" || t.startsWith("text/")
+        );
+        const hasImage = Array.from(types).some((t) => t.startsWith("image/"));
+
+        if (hasText) {
+          const text = cd.getData("text");
+          if (text) {
+            addItem(text, "text");
             return;
           }
         }
-      }
-    });
 
-    render();
-  </script>
-</body>
+        if (hasImage && cd.files.length > 0) {
+          const file = cd.files[0];
+          if (file.type.startsWith("image/")) {
+            const reader = new FileReader();
+            reader.onload = () => addItem(reader.result, "image");
+            reader.readAsDataURL(file);
+          }
+        }
+      });
+
+      render();
+    </script>
+  </body>
 </html>
