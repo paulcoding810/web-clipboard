@@ -55,7 +55,6 @@ h1 {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 .item.text-item {
-  white-space: pre-wrap;
   word-break: break-word;
 }
 .item.image-item img {
@@ -96,6 +95,73 @@ h1 {
 }
 .item .delete:hover {
   background: #dc3545;
+  color: white;
+}
+.item .edit {
+  position: absolute;
+  top: 8px;
+  right: 40px;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  background: #f0f0f0;
+  color: #666;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition:
+    opacity 0.2s,
+    background 0.2s,
+    color 0.2s;
+}
+.item:hover .edit {
+  opacity: 1;
+}
+.item .edit:hover {
+  background: #007bff;
+  color: white;
+}
+.item.edit-mode {
+  padding: 12px;
+}
+.item.edit-mode .text-content,
+.item.edit-mode .label,
+.item.edit-mode .delete,
+.item.edit-mode .edit {
+  display: none;
+}
+.item.edit-mode textarea {
+  width: 100%;
+  min-height: 60px;
+  padding: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  resize: vertical;
+}
+.item.edit-mode .edit-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.item.edit-mode .edit-actions button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.item.edit-mode .edit-actions .save {
+  background: #28a745;
+  color: white;
+}
+.item.edit-mode .edit-actions .cancel {
+  background: #6c757d;
   color: white;
 }
 .empty {

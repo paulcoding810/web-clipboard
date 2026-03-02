@@ -105,12 +105,61 @@ function render() {
   el.innerHTML = history
     .map((item) => {
       if (item.type === "text") {
-        return `<div class="item text-item" onclick="copyItem(history.find(i => i.id === ${item.id}))">${escapeHtml(item.content)}<span class="label">text</span><span class="delete" onclick="event.stopPropagation(); deleteItem(${item.id})">×</span></div>`;
+        return `<div class="item text-item" data-id="${item.id}" onclick="copyItem(history.find(i => i.id === ${item.id}))">
+          <span class="text-content">${escapeHtml(item.content)}</span>
+          <span class="label">text</span>
+          <button class="edit" onclick="event.stopPropagation(); editItem(${item.id})">✎</button>
+          <button class="delete" onclick="event.stopPropagation(); deleteItem(${item.id})">×</button>
+        </div>`;
       } else {
-        return `<div class="item image-item" onclick="copyItem(history.find(i => i.id === ${item.id}))"><img src="${item.content}" alt="clipboard image"><span class="label">image</span><span class="delete" onclick="event.stopPropagation(); deleteItem(${item.id})">×</span></div>`;
+        return `<div class="item image-item" onclick="copyItem(history.find(i => i.id === ${item.id}))"><img src="${item.content}" alt="clipboard image"><span class="label">image</span><button class="delete" onclick="event.stopPropagation(); deleteItem(${item.id})">×</button></div>`;
       }
     })
     .join("");
+}
+
+function editItem(id) {
+  const item = history.find((i) => i.id === id);
+  if (!item || item.type !== "text") return;
+
+  const el = document.querySelector(`.item[data-id="${id}"]`);
+  if (!el) return;
+
+  el.classList.add("edit-mode");
+  el.innerHTML = `
+    <textarea id="edit-textarea-${id}">${escapeHtml(item.content)}</textarea>
+    <div class="edit-actions">
+      <button class="save" onclick="saveEdit(${id})">Save</button>
+      <button class="cancel" onclick="cancelEdit(${id})">Cancel</button>
+    </div>
+  `;
+
+  const textarea = document.getElementById(`edit-textarea-${id}`);
+  textarea.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && e.metaKey) {
+      e.preventDefault();
+      saveEdit(id);
+    }
+  });
+  textarea.focus();
+}
+
+function saveEdit(id) {
+  const item = history.find((i) => i.id === id);
+  if (!item) return;
+
+  const textarea = document.getElementById(`edit-textarea-${id}`);
+  const newContent = textarea.value;
+
+  if (newContent.trim()) {
+    item.content = newContent;
+    save();
+  }
+  render();
+}
+
+function cancelEdit(id) {
+  render();
 }
 
 function escapeHtml(str) {
