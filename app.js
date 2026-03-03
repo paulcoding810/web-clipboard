@@ -16,7 +16,10 @@ function showToast(msg) {
 }
 
 function addItem(content, type) {
-  if (history.length >= MAX_ITEMS) history.pop();
+  if (history.length >= MAX_ITEMS) {
+    showToast("Clear history to add");
+    return;
+  }
   history.unshift({ content, type, id: Date.now() });
   save();
   render();
