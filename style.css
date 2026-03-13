@@ -125,13 +125,34 @@ h1 {
   background: #007bff;
   color: white;
 }
+.item .copy {
+  position: absolute;
+  top: 8px;
+  right: 72px;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  background: #f0f0f0;
+  color: #666;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s, background 0.2s, color 0.2s;
+}
+.item:hover .copy { opacity: 1; }
+.item .copy:hover { background: #28a745; color: white; }
 .item.edit-mode {
   padding: 12px;
 }
 .item.edit-mode .text-content,
 .item.edit-mode .label,
 .item.edit-mode .delete,
-.item.edit-mode .edit {
+.item.edit-mode .edit,
+.item.edit-mode .copy {
   display: none;
 }
 .item.edit-mode textarea {

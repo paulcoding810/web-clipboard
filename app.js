@@ -108,14 +108,15 @@ function render() {
   el.innerHTML = history
     .map((item) => {
       if (item.type === "text") {
-        return `<div class="item text-item" data-id="${item.id}" onclick="copyItem(history.find(i => i.id === ${item.id}))">
+        return `<div class="item text-item" data-id="${item.id}">
           <pre class="text-content">${escapeHtml(item.content)}</pre>
           <span class="label">text</span>
+          <button class="copy" onclick="copyItem(history.find(i => i.id === ${item.id}))">⧉</button>
           <button class="edit" onclick="event.stopPropagation(); editItem(${item.id})">✎</button>
           <button class="delete" onclick="event.stopPropagation(); deleteItem(${item.id})">×</button>
         </div>`;
       } else {
-        return `<div class="item image-item" onclick="copyItem(history.find(i => i.id === ${item.id}))"><img src="${item.content}" alt="clipboard image"><span class="label">image</span><button class="delete" onclick="event.stopPropagation(); deleteItem(${item.id})">×</button></div>`;
+        return `<div class="item image-item"><img src="${item.content}" alt="clipboard image"><span class="label">image</span><button class="copy" onclick="copyItem(history.find(i => i.id === ${item.id}))">⧉</button><button class="delete" onclick="event.stopPropagation(); deleteItem(${item.id})">×</button></div>`;
       }
     })
     .join("");
