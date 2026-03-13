@@ -57,6 +57,9 @@ h1 {
 .item.text-item {
   word-break: break-word;
 }
+.item .text-content {
+  white-space: pre-wrap;
+}
 .item.image-item img {
   max-width: 100%;
   max-height: 200px;
@@ -141,10 +144,18 @@ h1 {
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity 0.2s, background 0.2s, color 0.2s;
+  transition:
+    opacity 0.2s,
+    background 0.2s,
+    color 0.2s;
 }
-.item:hover .copy { opacity: 1; }
-.item .copy:hover { background: #28a745; color: white; }
+.item:hover .copy {
+  opacity: 1;
+}
+.item .copy:hover {
+  background: #28a745;
+  color: white;
+}
 .item.edit-mode {
   padding: 12px;
 }
