@@ -145,6 +145,9 @@ function editItem(id) {
       saveEdit(id);
     }
   });
+  textarea.addEventListener("paste", (e) => {
+    e.stopPropagation();
+  });
   textarea.focus();
 }
 
