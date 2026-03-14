@@ -195,7 +195,10 @@ document.addEventListener("paste", (e) => {
   const hasText = Array.from(types).some(
     (t) => t === "text/plain" || t.startsWith("text/")
   );
-  const hasImage = Array.from(types).some((t) => t.startsWith("image/"));
+
+  const hasImage = Array.from(types).some(
+    (t) => t.startsWith("image/") || t.startsWith("Files")
+  );
 
   if (hasText) {
     const text = cd.getData("text");
